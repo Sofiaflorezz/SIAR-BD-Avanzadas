@@ -10,122 +10,93 @@ def agregar_producto_pedido(
     conn = get_connection()
     cursor = conn.cursor()
 
-
-    # Buscar producto
-    cursor.execute("""
-
+    # buscar producto
+    cursor.execute(
+        """
         SELECT precio, stock
-
-        FROM producto
-
+        FROM productos
         WHERE id_producto=%s
-
-    """, (id_producto,))
+        """,
+        (id_producto,)
+    )
 
     producto = cursor.fetchone()
 
-
-    # Validar producto existente
-    if not producto:
+    if producto is None:
 
         cursor.close()
         conn.close()
 
         return "producto_no_existe"
 
+    precio = producto[0]
+    stock = producto[1]
 
-    precio = float(producto[0])
-    stock = int(producto[1])
-
-
-    # Validar stock suficiente
-    if cantidad > stock:
+    # validar stock
+    if stock < cantidad:
 
         cursor.close()
         conn.close()
 
         return "stock_insuficiente"
 
-
-    # Calcular subtotal
     subtotal = precio * cantidad
 
-
-    # Insertar detalle pedido
-    cursor.execute("""
-
+    # insertar detalle pedido
+    cursor.execute(
+        """
         INSERT INTO detalle_pedido(
-
             id_pedido,
             id_producto,
             cantidad,
-            precio_unitario,
             subtotal
-
         )
+        VALUES(%s,%s,%s,%s)
+        """,
+        (
+            id_pedido,
+            id_producto,
+            cantidad,
+            subtotal
+        )
+    )
 
-        VALUES(%s,%s,%s,%s,%s)
-
-    """, (
-
-        id_pedido,
-        id_producto,
-        cantidad,
-        precio,
-        subtotal
-
-    ))
-
-
-    # Descontar stock
-    cursor.execute("""
-
-        UPDATE producto
-
+    # descontar stock
+    cursor.execute(
+        """
+        UPDATE productos
         SET stock = stock - %s
-
         WHERE id_producto=%s
+        """,
+        (
+            cantidad,
+            id_producto
+        )
+    )
 
-    """, (
-
-        cantidad,
-        id_producto
-
-    ))
-
-
-    # Actualizar total pedido
-    cursor.execute("""
-
-        UPDATE pedido
-
-        SET total=(
-
+    # actualizar total pedido
+    cursor.execute(
+        """
+        UPDATE pedidos
+        SET total = (
             SELECT COALESCE(
                 SUM(subtotal),
                 0
             )
-
             FROM detalle_pedido
-
             WHERE id_pedido=%s
-
         )
-
         WHERE id_pedido=%s
-
-    """, (
-
-        id_pedido,
-        id_pedido
-
-    ))
-
+        """,
+        (
+            id_pedido,
+            id_pedido
+        )
+    )
 
     conn.commit()
 
     cursor.close()
     conn.close()
-
 
     return subtotal

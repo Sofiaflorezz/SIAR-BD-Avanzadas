@@ -7,39 +7,44 @@ from app.services.detalle_pedido_service import (
 
 def agregar_producto(id_pedido):
 
-    data = request.get_json()
+    data = request.json
 
-    id_producto = data.get("id_producto")
-    cantidad = data.get("cantidad")
+    id_producto = data.get(
+        "id_producto"
+    )
 
+    cantidad = data.get(
+        "cantidad"
+    )
 
-    subtotal = agregar_producto_pedido(
+    resultado = agregar_producto_pedido(
         id_pedido,
         id_producto,
         cantidad
     )
 
-
-    if subtotal == "producto_no_existe":
+    if resultado == "producto_no_existe":
 
         return jsonify({
-            "success": False,
-            "message": "Producto no existe"
+            "mensaje":
+            "Producto no encontrado"
         }), 404
 
 
-    if subtotal == "stock_insuficiente":
+    if resultado == "stock_insuficiente":
 
         return jsonify({
-            "success": False,
-            "message": "Stock insuficiente"
+            "mensaje":
+            "Stock insuficiente"
         }), 400
 
 
     return jsonify({
 
-        "success": True,
-        "message": "Producto agregado al pedido",
-        "subtotal": subtotal
+        "mensaje":
+        "Producto agregado",
+
+        "subtotal":
+        resultado
 
     }), 201
