@@ -16,6 +16,6 @@ CALL registrar_pedido(
 -- Cerrar último pedido manualmente
 -------------------------------------------------
 
-CALL cerrar_pedido(4);
+CALL cerrar_pedido(14);
 
 COMMIT;
