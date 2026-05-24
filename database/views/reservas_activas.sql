@@ -1,3 +1,6 @@
+-- Propósito: Vista de control operativo para el personal de mesa.
+-- Muestra de forma inmediata las reservas que se encuentran vigentes y aprobadas.
+
 CREATE OR REPLACE VIEW reservas_activas AS
 
 SELECT

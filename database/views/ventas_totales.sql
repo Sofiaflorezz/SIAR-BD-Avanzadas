@@ -1,3 +1,6 @@
+-- Propósito: Vista financiera agregada por fechas para el control de caja diario.
+-- Agrupa las facturas generadas mapeando la cronología de ingresos percibidos.
+
 CREATE OR REPLACE VIEW ventas_totales AS
 
 SELECT

@@ -1,3 +1,6 @@
+-- Propósito: Reporte gerencial avanzado con JOIN complejo de más de 3 tablas (Requisito R6).
+-- Resuelve analíticamente cuáles platos generan mayor tracción de ventas, ordenados de forma descendente.
+
 CREATE OR REPLACE VIEW productos_mas_vendidos AS
 
 SELECT
