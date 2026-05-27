@@ -55,6 +55,8 @@ La API estará disponible en `http://localhost:5000`.
 
 ### 4.1 Diagrama Relacional
 
+![Diagrama relacional](relational.png)
+
 ### 4.2 Diagrama de casos de uso
 
 ![Diagrama casos de uso](case_use_diagram.png)
