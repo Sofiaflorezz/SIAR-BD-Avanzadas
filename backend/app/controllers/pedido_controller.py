@@ -72,17 +72,19 @@ def obtener_pedido(id_pedido):
 
     productos = []
 
-
     for fila in datos:
-
+        # FILTRADO DE NULOS: Convertimos a float solo si el valor existe, si no, asignamos 0.0
+        subtotal_val = float(fila[5]) if fila[5] is not None else 0.0
+        precio_unitario_val = float(fila[4]) if fila[4] is not None else 0.0
+        
         productos.append({
-
-            "producto": fila[3],
-            "cantidad": fila[4],
-            "subtotal": float(fila[5])
-
+            "id_detalle": fila[0],
+            "id_producto": fila[2],
+            "nombre_producto": fila[3],
+            "cantidad": fila[1],
+            "precio_unitario": precio_unitario_val,
+            "subtotal": subtotal_val
         })
-
 
     return jsonify({
 
@@ -104,30 +106,20 @@ def obtener_pedido(id_pedido):
 # ======================
 
 def obtener_pedidos():
+    try:
+        # El servicio ya devuelve la lista de diccionarios perfectamente formateada
+        pedidos = get_pedidos()
 
-    pedidos = get_pedidos()
-
-    lista = []
-
-
-    for pedido in pedidos:
-
-        lista.append({
-
-            "id_pedido": pedido[0],
-            "id_cliente": pedido[1],
-            "total": float(pedido[2]),
-            "estado": pedido[3]
-
-        })
-
-
-    return jsonify({
-
-        "success": True,
-        "pedidos": lista
-
-    })
+        return jsonify({
+            "success": True,
+            "pedidos": pedidos
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
 
 def cerrar_pedido_controller(id_pedido):
 

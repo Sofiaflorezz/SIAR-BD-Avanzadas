@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>SIAR - Panel de Control Total</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+:root {
+  --font-sans: system-ui, -apple-system, sans-serif;
+  --color-text-primary: #111827;
+  --color-text-secondary: #4b5563;
+  --color-text-tertiary: #9ca3af;
+  --color-text-success: #065f46;
+  --color-text-danger: #991b1b;
+  --color-text-warning: #92400e;
+  --color-background-primary: #ffffff;
+  --color-background-secondary: #f3f4f6;
+  --color-background-success: #d1fae5;
+  --color-background-danger: #fee2e2;
+  --color-background-warning: #fef3c7;
+  --color-border-primary: #3b82f6;
+  --color-border-secondary: #d1d5db;
+  --color-border-tertiary: #e5e7eb;
+  --color-border-danger: #f87171;
+  --border-radius-md: 6px;
+  --border-radius-lg: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-sans);font-size:14px;color:var(--color-text-primary)}
+.app{display:flex;height:100vh;min-height:600px}
+.sidebar{width:220px;flex-shrink:0;border-right:0.5px solid var(--color-border-tertiary);padding:1rem 0;display:flex;flex-direction:column;gap:2px;background:var(--color-background-secondary)}
+.nav-item{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;border-radius:0;font-size:13px;color:var(--color-text-secondary);transition:all 0.15s;border-left:2px solid transparent}
+.nav-item:hover{background:var(--color-background-primary);color:var(--color-text-primary)}
+.nav-item.active{background:var(--color-background-primary);color:var(--color-text-primary);border-left-color:var(--color-text-primary);font-weight:500}
+.nav-item i{font-size:16px}
+.nav-section{padding:12px 16px 4px;font-size:11px;font-weight:500;color:var(--color-text-tertiary);text-transform:uppercase;letter-spacing:0.05em}
+.main{flex:1;overflow-y:auto;padding:1.5rem}
+.page{display:none}
+.page.active{display:block}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem}
+.page-title{font-size:18px;font-weight:500}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);cursor:pointer;font-size:13px;font-weight:500;transition:all 0.15s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:var(--color-text-primary);color:var(--color-background-primary);border-color:var(--color-text-primary)}
+.btn-primary:hover{opacity:0.85}
+.btn-danger{color:var(--color-text-danger);border-color:var(--color-border-danger)}
+.btn-danger:hover{background:var(--color-background-danger)}
+.btn-sm{padding:4px 10px;font-size:12px}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1rem 1.25rem;margin-bottom:1rem}
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:1.5rem}
+.metric{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem}
+.metric-label{font-size:12px;color:var(--color-text-secondary);margin-bottom:4px}
+.metric-value{font-size:22px;font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 12px;font-size:12px;font-weight:500;color:var(--color-text-secondary);border-bottom:0.5px solid var(--color-border-tertiary)}
+td{padding:8px 12px;border-bottom:0.5px solid var(--color-border-tertiary);color:var(--color-text-primary)}
+tr:hover td{background:var(--color-background-secondary)}
+.badge{display:inline-flex;align-items:center;padding:2px 8px;border-radius:999px;font-size:11px;font-weight:500}
+.badge-bd{background:#8b5cf6;color:#ffffff}
+.badge-open{background:var(--color-background-success);color:var(--color-text-success)}
+.badge-closed{background:var(--color-background-secondary);color:var(--color-text-secondary)}
+.badge-stock-ok{background:var(--color-background-success);color:var(--color-text-success)}
+.badge-stock-low{background:var(--color-background-warning);color:var(--color-text-warning)}
+.badge-no-stock{background:var(--color-background-danger);color:var(--color-text-danger)}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.35);display:none;align-items:center;justify-content:center;z-index:100}
+.modal-overlay.open{display:flex}
+.modal{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.5rem;width:460px;max-width:90vw;max-height:85vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.modal-title{font-size:16px;font-weight:500}
+.form-group{margin-bottom:1rem}
+.form-label{display:block;font-size:12px;font-weight:500;color:var(--color-text-secondary);margin-bottom:4px}
+input,select{width:100%;padding:7px 10px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:inherit}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.modal-footer{display:flex;gap:8px;justify-content:flex-end;margin-top:1.25rem;padding-top:1rem;border-top:0.5px solid var(--color-border-tertiary)}
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--color-text-primary);color:var(--color-background-primary);padding:10px 16px;border-radius:var(--border-radius-md);font-size:13px;font-weight:500;opacity:0;transition:opacity 0.2s;z-index:200}
+.toast.show{opacity:1}
+.empty-state{text-align:center;padding:2.5rem 1rem;color:var(--color-text-secondary)}
+.logo{padding:12px 16px 16px;border-bottom:0.5px solid var(--color-border-tertiary);margin-bottom:8px}
+.logo-text{font-size:15px;font-weight:500}
+.logo-sub{font-size:11px;color:var(--color-text-tertiary)}
+.detail-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:0.5px solid var(--color-border-tertiary);font-size:13px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="sidebar">
+    <div class="logo">
+      <div class="logo-text">SIAR Avanzado</div>
+      <div class="logo-sub">Panel operativo e integral</div>
+    </div>
+    <div class="nav-section">Principal</div>
+    <div class="nav-item active" onclick="nav('overview')" id="nav-overview"><i class="ti ti-layout-dashboard"></i> Panel</div>
+    <div class="nav-section">Gestión Base</div>
+    <div class="nav-item" onclick="nav('clientes')" id="nav-clientes"><i class="ti ti-users"></i> Clientes</div>
+    <div class="nav-item" onclick="nav('productos')" id="nav-productos"><i class="ti ti-box"></i> Productos</div>
+    <div class="nav-item" onclick="nav('pedidos')" id="nav-pedidos"><i class="ti ti-receipt"></i> Pedidos</div>
+    <div class="nav-section">Logística e Infraestructura</div>
+    <div class="nav-item" onclick="nav('mesas')" id="nav-mesas"><i class="ti ti-armchair"></i> Mesas</div>
+    <div class="nav-item" onclick="nav('reservas')" id="nav-reservas"><i class="ti ti-calendar-event"></i> Reservas</div>
+    <div class="nav-item" onclick="nav('ingredientes')" id="nav-ingredientes"><i class="ti ti-flask"></i> Ingredientes</div>
+  </div>
+
+  <div class="main">
+    <div class="page active" id="page-overview">
+      <div class="page-header">
+        <div class="page-title">Panel General (Dashboard Analítico)</div>
+        <button class="btn" onclick="refreshAll()"><i class="ti ti-refresh"></i> Sincronizar Datos</button>
+      </div>
+      
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+        <div class="card" style="border-left:4px solid #8b5cf6;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span style="font-size:13px;font-weight:500;">Cliente VIP <span class="badge badge-bd">Subconsulta (R5)</span></span>
+          </div>
+          <div id="overview-vip-cliente" style="font-size:18px;font-weight:bold;">Cargando...</div>
+          <div id="overview-vip-correo" style="font-size:12px;color:var(--color-text-secondary)">-</div>
+        </div>
+        <div class="card" style="border-left:4px solid #8b5cf6;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <span style="font-size:13px;font-weight:500;">Top Ventas <span class="badge badge-bd">Vista Compleja (R6)</span></span>
+          </div>
+          <div id="overview-top-productos" style="font-size:13px;color:var(--color-text-secondary)">Cargando métricas...</div>
+        </div>
+      </div>
+
+      <div class="metrics">
+        <div class="metric"><div class="metric-label">Clientes</div><div class="metric-value" id="stat-clientes">—</div></div>
+        <div class="metric"><div class="metric-label">Productos</div><div class="metric-value" id="stat-productos">—</div></div>
+        <div class="metric"><div class="metric-label">Pedidos Activos</div><div class="metric-value" id="stat-pedidos-open">—</div></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        <div class="card">
+          <div style="font-size:13px;font-weight:500;margin-bottom:12px">Últimos Pedidos Guardados</div>
+          <div id="overview-pedidos"><div class="empty-state"><i class="ti ti-receipt"></i>Sin registros</div></div>
+        </div>
+        <div class="card">
+          <div style="font-size:13px;font-weight:500;margin-bottom:12px">Alerta Stock Crítico (≤ 5 uds)</div>
+          <div id="overview-stock"><div class="empty-state"><i class="ti ti-box"></i>Sin registros</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="page" id="page-clientes">
+      <div class="page-header">
+        <div class="page-title">Módulo de Clientes</div>
+        <button class="btn btn-primary" onclick="openModal('modal-cliente')"><i class="ti ti-plus"></i> Registrar Cliente</button>
+      </div>
+      <div class="card" style="padding:0">
+        <table>
+          <thead><tr><th>ID</th><th>Nombre</th><th>Teléfono</th><th>Correo</th><th>Cédula</th><th>Acción</th></tr></thead>
+          <tbody id="table-clientes"><tr><td colspan="6" class="empty-state">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-productos">
+      <div class="page-header">
+        <div class="page-title">Catálogo de Productos</div>
+        <button class="btn btn-primary" onclick="openModal('modal-producto')"><i class="ti ti-plus"></i> Nuevo Item</button>
+      </div>
+      <div class="card" style="padding:0">
+        <table>
+          <thead><tr><th>ID</th><th>Nombre</th><th>Detalle</th><th>Precio</th><th>Inventario</th><th>Componentes</th></tr></thead>
+          <tbody id="table-productos"><tr><td colspan="6" class="empty-state">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-pedidos">
+      <div class="page-header">
+        <div class="page-title">Control de Pedidos</div>
+        <button class="btn btn-primary" onclick="openModal('modal-pedido')"><i class="ti ti-plus"></i> Apertura de Factura</button>
+      </div>
+      <div class="card" style="padding:0">
+        <table>
+          <thead><tr><th>ID</th><th>Cliente</th><th>Mesa</th><th>Total</th><th>Estado</th><th>Operaciones</th></tr></thead>
+          <tbody id="table-pedidos"><tr><td colspan="6" class="empty-state">Cargando...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-mesas">
+      <div class="page-header">
+        <div class="page-title">Distribución de Salón (Mesas)</div>
+        <button class="btn btn-primary" onclick="openModal('modal-mesa')"><i class="ti ti-plus"></i> Añadir Mesa</button>
+      </div>
+      <div class="card" style="padding:0">
+        <table>
+          <thead><tr><th>ID Mesa</th><th>Número Asignado</th><th>Capacidad Máxima</th><th>Estado Operativo</th></tr></thead>
+          <tbody id="table-mesas"><tr><td colspan="4" class="empty-state">Cargando distribución...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-reservas">
+      <div class="page-header">
+        <div class="page-title">Libro de Reservas Estructuradas</div>
+        <button class="btn btn-primary" onclick="openModal('modal-reserva')"><i class="ti ti-plus"></i> Crear Reserva</button>
+      </div>
+      <div class="card" style="padding:0">
+        <table>
+          <thead><tr><th>ID Reserva</th><th>Titular Cliente</th><th>Mesa Asignada</th><th>Fecha</th><th>Hora</th><th>Estado</th></tr></thead>
+          <tbody id="table-reservas"><tr><td colspan="6" class="empty-state">Cargando histórico de reservas...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="page" id="page-ingredientes">
+      <div class="page-header">
+        <div class="page-title">Gestión de Materia Prima e Ingredientes</div>
+        <button class="btn btn-primary" onclick="openModal('modal-ingrediente')"><i class="ti ti-plus"></i> Registrar Materia Prima</button>
+      </div>
+      <div class="card" style="padding:0">
+        <table>
+          <thead><tr><th>ID Ingrediente</th><th>Descripción</th><th>Stock Disponible</th><th>Unidad</th></tr></thead>
+          <tbody id="table-ingredientes"><tr><td colspan="4" class="empty-state">Cargando almacén...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-mesa">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Registrar Nueva Mesa</div>
+      <button class="btn btn-sm" onclick="closeModal('modal-mesa')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-group"><label class="form-label">Número de Mesa</label><input id="m-numero" type="number"></div>
+    <div class="form-group"><label class="form-label">Capacidad de Personas</label><input id="m-capacidad" type="number"></div>
+    <div class="form-group">
+      <label class="form-label">Estado Inicial</label>
+      <select id="m-estado"><option value="Disponible">Disponible</option><option value="Ocupada">Ocupada</option></select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-mesa')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMesa()">Insertar Mesa</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-reserva">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Agendar Nueva Reserva</div>
+      <button class="btn btn-sm" onclick="closeModal('modal-reserva')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-group"><label class="form-label">ID del Cliente Solicitante</label><input id="res-cliente" type="number"></div>
+    <div class="form-group"><label class="form-label">ID de la Mesa a Bloquear</label><input id="res-mesa" type="number"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Fecha</label><input id="res-fecha" type="date"></div>
+      <div class="form-group"><label class="form-label">Hora</label><input id="res-hora" type="time"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-reserva')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveReserva()">Confirmar Reserva</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-ingrediente">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Agregar Ingrediente al Inventario</div>
+      <button class="btn btn-sm" onclick="closeModal('modal-ingrediente')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-group"><label class="form-label">Nombre del Ingrediente</label><input id="ing-nombre" type="text"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Stock de Entrada</label><input id="ing-stock" type="number"></div>
+      <div class="form-group"><label class="form-label">Unidad de Medida (ej: gr, und, ml)</label><input id="ing-unidad" type="text" placeholder="gr"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-ingrediente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveIngrediente()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-receta">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-receta-title">Fórmula de Preparación</div>
+      <button class="btn btn-sm" onclick="closeModal('modal-receta')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="receta-contenido" style="margin-top:10px;">Cargando receta...</div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="closeModal('modal-receta')">Entendido</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-cliente">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nuevo Cliente</div>
+      <button class="btn btn-sm" onclick="closeModal('modal-cliente')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="cliente-id">
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Nombre</label><input id="c-nombre"></div>
+      <div class="form-group"><label class="form-label">Cédula (Indexada R7)</label><input id="c-cedula"></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Teléfono</label><input id="c-telefono"></div>
+      <div class="form-group"><label class="form-label">Correo</label><input id="c-correo" type="email"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-cliente')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCliente()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-producto">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Nuevo Producto</div>
+      <button class="btn btn-sm" onclick="closeModal('modal-producto')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-group"><label class="form-label">Nombre Comercial</label><input id="p-nombre"></div>
+    <div class="form-group"><label class="form-label">Detalles de Preparación</label><input id="p-detalle"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Precio al Público ($)</label><input id="p-precio" type="number" step="0.01"></div>
+      <div class="form-group"><label class="form-label">Stock de Seguridad</label><input id="p-stock" type="number"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-producto')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveProducto()">Guardar</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-pedido">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">Abrir Orden de Servicio</div>
+      <button class="btn btn-sm" onclick="closeModal('modal-pedido')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="form-group"><label class="form-label">ID del Cliente Titular</label><input id="ped-cliente" type="number"></div>
+    <div class="form-group"><label class="form-label">Mesa Física Asignada</label><input id="ped-mesa" type="number"></div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('modal-pedido')">Cancelar</button>
+      <button class="btn btn-primary" onclick="savePedido()">Crear Comprobante</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-detalle">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-detalle-title">Pedido #—</div>
+      <button class="btn btn-sm" onclick="closeModal('modal-detalle')"><i class="ti ti-x"></i></button>
+    </div>
+    <div id="detalle-info" style="margin-bottom:1rem"></div>
+    <div style="font-size:13px;font-weight:500;margin-bottom:8px">Inyectar Producto <span class="badge badge-bd">Transacción R8</span></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">ID Producto</label><input id="dp-producto" type="number"></div>
+      <div class="form-group"><label class="form-label">Cantidad a Pedir</label><input id="dp-cantidad" type="number" value="1" min="1"></div>
+    </div>
+    <div class="modal-footer" style="justify-content:space-between">
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="btn-cerrar-pedido" onclick="cerrarPedido()"><i class="ti ti-lock"></i> Cerrar</button>
+        <button class="btn" id="btn-facturar-pedido" onclick="facturarPedido()"><i class="ti ti-file-invoice"></i> Facturar</button>
+      </div>
+      <button class="btn btn-primary" onclick="agregarProductoPedido()"><i class="ti ti-plus"></i> Ejecutar Inserción</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const BASE = 'http://localhost:5000';
+let currentPedidoId = null;
+
+function nav(page) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + page).classList.add('active');
+  document.getElementById('nav-' + page).classList.add('active');
+  
+  if(page === 'overview') refreshAll();
+  if(page === 'clientes') loadClientes();
+  if(page === 'productos') loadProductos();
+  if(page === 'pedidos') loadPedidos();
+  if(page === 'mesas') loadMesas();
+  if(page === 'reservas') loadReservas();
+  if(page === 'ingredientes') loadIngredientes();
+}
+
+function toast(msg, ok=true) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.background = ok ? 'var(--color-text-primary)' : '#c0392b';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+async function api(path, method='GET', body=null) {
+  const opts = { method, headers: {'Content-Type':'application/json'} };
+  if(body) opts.body = JSON.stringify(body);
+  const r = await fetch(BASE + path, opts);
+  return r.json();
+}
+
+function stockBadge(s) {
+  if(s <= 0) return '<span class="badge badge-no-stock">Agotado</span>';
+  if(s <= 5) return '<span class="badge badge-stock-low">' + s + ' uds.</span>';
+  return '<span class="badge badge-stock-ok">' + s + ' uds.</span>';
+}
+
+// ==========================================
+// CONTROL DE DATOS ADICIONALES (NUEVOS MÓDULOS)
+// ==========================================
+async function loadMesas() {
+  const tb = document.getElementById('table-mesas');
+  try {
+    const res = await api('/mesas');
+    if(!res.data || !res.data.length) { tb.innerHTML = '<tr><td colspan="4" class="empty-state">No hay mesas mapeadas.</td></tr>'; return; }
+    tb.innerHTML = res.data.map(m => `<tr><td>#${m.id_mesa}</td><td style="font-weight:bold">Mesa ${m.numero_mesa}</td><td>${m.capacidad} Asientos</td><td><span class="badge ${m.estado==='Disponible'?'badge-open':'badge-closed'}">${m.estado}</span></td></tr>`).join('');
+  } catch(e) { tb.innerHTML = '<tr><td colspan="4" class="empty-state">Error al conectar con la API de mesas.</td></tr>'; }
+}
+
+async function loadReservas() {
+  const tb = document.getElementById('table-reservas');
+  try {
+    const res = await api('/reservas');
+    if(!res.data || !res.data.length) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">No se registran reservas vigentes.</td></tr>'; return; }
+    tb.innerHTML = res.data.map(r => `<tr><td>#${r.id_reserva}</td><td style="font-weight:500">${r.cliente}</td><td>Mesa #${r.id_mesa}</td><td>${r.fecha}</td><td>${r.hora}</td><td><span class="badge badge-open">${r.estado}</span></td></tr>`).join('');
+  } catch(e) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">Fallo de comunicación en reservas.</td></tr>'; }
+}
+
+async function loadIngredientes() {
+  const tb = document.getElementById('table-ingredientes');
+  try {
+    const res = await api('/ingredientes');
+    if(!res.data || !res.data.length) { tb.innerHTML = '<tr><td colspan="4" class="empty-state">No hay materias primas en inventario.</td></tr>'; return; }
+    tb.innerHTML = res.data.map(i => `<tr><td>#${i.id_ingrediente}</td><td style="font-weight:500">${i.nombre}</td><td>${stockBadge(i.stock_disponible)}</td><td><mark>${i.unidad_medida}</mark></td></tr>`).join('');
+  } catch(e) { tb.innerHTML = '<tr><td colspan="4" class="empty-state">Fallo en ingredientes.</td></tr>'; }
+}
+
+async function verReceta(idProducto, nombreProducto) {
+  document.getElementById('modal-receta-title').textContent = 'Receta: ' + nombreProducto;
+  const contenedor = document.getElementById('receta-contenido');
+  contenedor.innerHTML = 'Consultando base de datos...';
+  openModal('modal-receta');
+  try {
+    const res = await api(`/productos/${idProducto}/ingredientes`);
+    if(!res.data || !res.data.length) { contenedor.innerHTML = '<div class="empty-state">Este producto se sirve de forma directa (Sin receta vinculada en producto_ingrediente).</div>'; return; }
+    contenedor.innerHTML = res.data.map(r => `<div class="detail-row"><span><i class="ti ti-circle-dot"></i> ${r.ingrediente}</span><span>${r.cantidad_requerida} ${r.unidad}</span></div>`).join('');
+  } catch(e) { contenedor.innerHTML = 'Error de red al consultar componentes.'; }
+}
+
+// GUARDADO DE NUEVOS MÓDULOS
+async function saveMesa() {
+  const body = { numero_mesa: parseInt(document.getElementById('m-numero').value), capacidad: parseInt(document.getElementById('m-capacidad').value), estado: document.getElementById('m-estado').value };
+  if(!body.numero_mesa || !body.capacidad) { toast('Todos los campos son requeridos', false); return; }
+  const r = await api('/mesas', 'POST', body);
+  if(r.success) { toast('Mesa agregada correctamente'); closeModal('modal-mesa'); loadMesas(); } else { toast('Error: Posible número de mesa duplicado', false); }
+}
+
+async function saveReserva() {
+  const body = { id_cliente: parseInt(document.getElementById('res-cliente').value), id_mesa: parseInt(document.getElementById('res-mesa').value), fecha: document.getElementById('res-fecha').value, hora: document.getElementById('res-hora').value };
+  if(!body.id_cliente || !body.id_mesa || !body.fecha || !body.hora) { toast('Llene los campos obligatorios', false); return; }
+  const r = await api('/reservas', 'POST', body);
+  if(r.success) { toast('Reserva registrada en el sistema'); closeModal('modal-reserva'); loadReservas(); } else { toast('Error de inserción (Valide IDs existentes)', false); }
+}
+
+async function saveIngrediente() {
+  const body = { nombre: document.getElementById('ing-nombre').value, stock_disponible: parseInt(document.getElementById('ing-stock').value), unidad_medida: document.getElementById('ing-unidad').value };
+  if(!body.nombre || !body.unidad_medida) { toast('Faltan campos', false); return; }
+  const r = await api('/ingredientes', 'POST', body);
+  if(r.success) { toast('Ingrediente cargado al inventario'); closeModal('modal-ingrediente'); loadIngredientes(); } else { toast('Fallo al registrar ingrediente', false); }
+}
+
+// ==========================================
+// CONTROL METRICAS DASHBOARD (R5 - R6)
+// ==========================================
+async function refreshAll() {
+  try {
+    const vip = await api('/estadisticas/mejor-cliente');
+    if (vip.success) {
+      document.getElementById('overview-vip-cliente').textContent = vip.nombre;
+      document.getElementById('overview-vip-correo').textContent = vip.correo;
+    } else {
+      document.getElementById('overview-vip-cliente').textContent = "Sin transacciones";
+    }
+
+    const top = await api('/estadisticas/top-productos');
+    if (top.success && top.data) {
+      if(!top.data.length) document.getElementById('overview-top-productos').innerHTML = 'Sin ventas registradas';
+      else document.getElementById('overview-top-productos').innerHTML = top.data.map(p => 
+        `<div class="detail-row"><span>${p.nombre}</span><span style="font-weight:bold">${p.total_vendido} unidades</span></div>`
+      ).join('');
+    }
+
+    const [c, p, ped] = await Promise.all([api('/clientes'), api('/productos'), api('/pedidos')]);
+    
+    document.getElementById('stat-clientes').textContent = c.data ? c.data.length : '0';
+    document.getElementById('stat-productos').textContent = p.data ? p.data.length : '0';
+    const abiertos = ped.pedidos ? ped.pedidos.filter(x => x.estado !== 'cerrado').length : 0;
+    document.getElementById('stat-pedidos-open').textContent = abiertos;
+    
+    if(ped.pedidos && ped.pedidos.length) {
+      const recent = ped.pedidos.slice(-4).reverse();
+      document.getElementById('overview-pedidos').innerHTML = recent.map(x =>
+        `<div class="detail-row"><span>Pedido #${x.id_pedido} — ID Cliente: ${x.id_cliente}</span><span class="badge ${x.estado==='cerrado'?'badge-closed':'badge-open'}">${x.estado||'abierto'}</span></div>`).join('');
+    }
+    
+    if(p.data) {
+      const low = p.data.filter(x => x.stock <= 5);
+      if(low.length) document.getElementById('overview-stock').innerHTML = low.map(x =>
+        `<div class="detail-row"><span>${x.nombre}</span>${stockBadge(x.stock)}</div>`).join('');
+      else document.getElementById('overview-stock').innerHTML = '<div class="empty-state" style="padding:1rem;">Niveles de stock correctos ✓</div>';
+    }
+  } catch(e) { toast('Error al consultar paneles estadísticos.', false); }
+}
+
+// ==========================================
+// FUNCIONES CRUD ORIGINALES ADAPTADAS
+// ==========================================
+async function loadClientes() {
+  const tb = document.getElementById('table-clientes');
+  try {
+    const d = await api('/clientes');
+    if(!d.data || !d.data.length) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">No hay clientes</td></tr>'; return; }
+    tb.innerHTML = d.data.map(c => `<tr><td>#${c.id_cliente}</td><td style="font-weight:500">${c.nombre}</td><td>${c.telefono||'—'}</td><td>${c.correo||'—'}</td><td>${c.cedula||'—'}</td><td><button class="btn btn-sm btn-danger" onclick="deleteCliente(${c.id_cliente})"><i class="ti ti-trash"></i></button></td></tr>`).join('');
+  } catch(e) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">Error al cargar datos.</td></tr>'; }
+}
+
+async function loadProductos() {
+  const tb = document.getElementById('table-productos');
+  try {
+    const d = await api('/productos');
+    if(!d.data || !d.data.length) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">No hay productos</td></tr>'; return; }
+    tb.innerHTML = d.data.map(p => `<tr><td>#${p.id_producto}</td><td style="font-weight:500">${p.nombre}</td><td>${p.detalle_producto||'—'}</td><td>$${parseFloat(p.precio).toFixed(2)}</td><td>${stockBadge(p.stock)}</td><td><button class="btn btn-sm" onclick="verReceta(${p.id_producto}, '${p.nombre}')"><i class="ti ti-flask"></i> Ver Receta</button></td></tr>`).join('');
+  } catch(e) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">Error de servidor.</td></tr>'; }
+}
+
+async function loadPedidos() {
+  const tb = document.getElementById('table-pedidos');
+  try {
+    const d = await api('/pedidos');
+    if(!d.pedidos || !d.pedidos.length) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">No hay registros de pedidos</td></tr>'; return; }
+    tb.innerHTML = d.pedidos.map(p => `<tr><td>#${p.id_pedido}</td><td>Cliente #${p.id_cliente}</td><td>Mesa: ${p.id_mesa||'N/A'}</td><td style="font-weight:600">$${parseFloat(p.total).toFixed(2)}</td><td><span class="badge ${p.estado==='cerrado'?'badge-closed':'badge-open'}">${p.estado||'abierto'}</span></td><td><button class="btn btn-sm" onclick="verDetalle(${p.id_pedido})"><i class="ti ti-eye"></i> Gestionar</button></td></tr>`).join('');
+  } catch(e) { tb.innerHTML = '<tr><td colspan="6" class="empty-state">Error de red.</td></tr>'; }
+}
+
+async function saveCliente() {
+  const body = { nombre: document.getElementById('c-nombre').value, telefono: document.getElementById('c-telefono').value, correo: document.getElementById('c-correo').value, cedula: document.getElementById('c-cedula').value };
+  if(!body.nombre || !body.cedula) { toast('Nombre y cédula obligatorios', false); return; }
+  try {
+    await api('/clientes', 'POST', body);
+    toast('Cliente guardado'); closeModal('modal-cliente'); loadClientes();
+  } catch(e) { toast('Error al procesar cliente', false); }
+}
+
+async function saveProducto() {
+  const body = { nombre: document.getElementById('p-nombre').value, detalle_producto: document.getElementById('p-detalle').value, precio: parseFloat(document.getElementById('p-precio').value)||0, stock: parseInt(document.getElementById('p-stock').value)||0 };
+  if(!body.nombre) { toast('Nombre obligatorio', false); return; }
+  try {
+    await api('/productos', 'POST', body); toast('Producto creado con éxito'); closeModal('modal-producto'); loadProductos();
+  } catch(e) { toast('Error', false); }
+}
+
+async function savePedido() {
+  const id_cliente = parseInt(document.getElementById('ped-cliente').value);
+  const id_mesa = parseInt(document.getElementById('ped-mesa').value) || null;
+  if(!id_cliente) { toast('ID cliente obligatorio', false); return; }
+  try {
+    const d = await api('/pedidos', 'POST', {id_cliente, id_mesa});
+    toast('Pedido #' + d.id_pedido + ' inicializado'); closeModal('modal-pedido'); loadPedidos();
+  } catch(e) { toast('Error al crear pedido', false); }
+}
+
+async function verDetalle(id) {
+  currentPedidoId = id;
+  document.getElementById('modal-detalle-title').textContent = 'Gestión Pedido #' + id;
+  try {
+    const d = await api('/pedidos/' + id);
+    let html = '';
+    if(d.productos && d.productos.length) {
+      html = d.productos.map(p => `<div class="detail-row"><span>${p.producto} × ${p.cantidad}</span><span>$${parseFloat(p.subtotal).toFixed(2)}</span></div>`).join('');
+      html += `<div class="detail-row" style="font-weight:600; border-top:1px solid var(--color-border-secondary); padding-top:8px"><span>Total de la Orden</span><span>$${parseFloat(d.total).toFixed(2)}</span></div>`;
+    } else { html = '<div class="empty-state" style="padding:10px">No posee items en el detalle.</div>'; }
+    document.getElementById('detalle-info').innerHTML = html;
+  } catch(e) { document.getElementById('detalle-info').innerHTML = '<div style="color:var(--color-text-danger)">Error de comunicación.</div>'; }
+  openModal('modal-detalle');
+}
+
+// PROCESAMIENTO ATÓMICO (TRANSACCIÓN CONTROLADA EN BACKEND)
+async function agregarProductoPedido() {
+  const id_producto = parseInt(document.getElementById('dp-producto').value);
+  const cantidad = parseInt(document.getElementById('dp-cantidad').value) || 1;
+  if(!id_producto) { toast('Ingrese un ID de producto válido', false); return; }
+  try {
+    const d = await api('/pedidos/' + currentPedidoId + '/productos', 'POST', {id_producto, cantidad});
+    
+    // Si la transacción fue confirmada por el Backend devuelve el subtotal
+    if(d.subtotal !== undefined) { 
+      toast('Producto inyectado. Transacción consolidada con COMMIT.', true); 
+      verDetalle(currentPedidoId); 
+    } else { 
+      // Si falló el Trigger de Stock o el guardado, se aplicó ROLLBACK y el backend reporta el fallo
+      toast('TRANSACCIÓN REVERTIDA (ROLLBACK): ' + (d.mensaje || 'Stock insuficiente'), false); 
+    }
+  } catch(e) { toast('Error del servicio transaccional', false); }
+}
+
+async function cerrarPedido() {
+  try {
+    const d = await api('/pedidos/' + currentPedidoId + '/cerrar', 'PUT');
+    if(d.success) { toast('Pedido cerrado con éxito'); closeModal('modal-detalle'); loadPedidos(); }
+  } catch(e) { toast('Error', false); }
+}
+
+async function facturarPedido() {
+  try {
+    const d = await api('/pedidos/' + currentPedidoId + '/facturar', 'POST');
+    if(d.success) { toast('Factura generada. Recibido total de: $' + parseFloat(d.total).toFixed(2)); closeModal('modal-detalle'); loadPedidos(); }
+  } catch(e) { toast('Error', false); }
+}
+
+async function deleteCliente(id) {
+  if(!confirm('¿Eliminar cliente? Se comprobará integridad referencial.')) return;
+  try { await fetch(BASE+'/clientes/'+id, {method:'DELETE'}); toast('Cliente eliminado'); loadClientes(); } catch(e) { toast('Error', false); }
+}
+
+async function deleteProducto(id) {
+  if(!confirm('¿Eliminar producto?')) return;
+  try { await fetch(BASE+'/productos/'+id, {method:'DELETE'}); toast('Producto removido'); loadProductos(); } catch(e) { toast('Error', false); }
+}
+
+document.addEventListener('DOMContentLoaded', refreshAll);
+</script>
+</body>
+</html>

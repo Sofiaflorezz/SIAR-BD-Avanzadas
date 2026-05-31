@@ -66,6 +66,6 @@ FOR EACH ROW
 -- Cláusula WHEN: Solo ejecutamos el trigger si están pidiendo más de 0 unidades.
 -- Esto filtra casos irrelevantes (ej: actualizaciones de precio o fecha donde la cantidad no cambia o es nula)
 
-WHEN (NEW.cantidad_pedida > 0)
+WHEN (NEW.cantidad > 0)
 
 EXECUTE FUNCTION fn_validar_stock();

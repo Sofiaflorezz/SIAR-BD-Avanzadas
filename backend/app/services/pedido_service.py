@@ -86,31 +86,37 @@ def get_pedido_by_id(id_pedido):
 # ==========================
 
 def get_pedidos():
-
     conn = get_connection()
     cursor = conn.cursor()
+
 
     cursor.execute(
         """
         SELECT
-
             id_pedido,
             id_cliente,
+            id_mesa,   
             total,
             estado
-
         FROM pedido
-
-        ORDER BY id_pedido
+        ORDER BY id_pedido DESC
         """
     )
-
     pedidos = cursor.fetchall()
-
     cursor.close()
     conn.close()
 
-    return pedidos
+    lista = []
+    for pedido in pedidos:
+        lista.append({
+            "id_pedido": pedido[0],
+            "id_cliente": pedido[1],
+            "id_mesa": pedido[2],       
+            "total": float(pedido[3]),
+            "estado": pedido[4]
+        })
+
+    return lista
 def cerrar_pedido(id_pedido):
 
     conn = get_connection()
