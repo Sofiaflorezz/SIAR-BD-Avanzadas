@@ -1,19 +1,15 @@
 from flask import Blueprint
-
 from app.controllers.pedido_controller import (
     crear_pedido,
     obtener_pedido,
     obtener_pedidos,
-    cerrar_pedido_controller,
     cerrar_y_facturar
 )
-
 
 pedido_bp = Blueprint(
     "pedido_bp",
     __name__
 )
-
 
 pedido_bp.route(
     "/pedidos",
@@ -33,7 +29,7 @@ pedido_bp.route(
 pedido_bp.route(
     "/pedidos/<int:id_pedido>/cerrar",
     methods=["PUT"]
-)(cerrar_pedido_controller)
+)(cerrar_y_facturar)
 
 pedido_bp.route(
     "/pedidos/<int:id_pedido>/facturar",
