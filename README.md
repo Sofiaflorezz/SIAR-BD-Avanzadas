@@ -78,6 +78,7 @@ La API REST expone los siguientes endpoints, estructurados por dominio:
 | **DELETE** | `/productos/<id>` | Elimina un producto del catálogo. |
 | **POST** | `/pedidos` | Crea un nuevo pedido asociado a un cliente/mesa. |
 | **GET** | `/pedidos` | Obtiene el historial de pedidos. |
+| **GET** | `/pedidos/<id>` | Obtiene el detalle de un pedido específico. |
 | **POST** | `/pedidos/<id>/productos` | Agrega un producto (detalle) a un pedido existente. |
 | **PUT** | `/pedidos/<id>/cerrar` | Ejecuta el procedimiento para cerrar un pedido. |
 | **POST** | `/pedidos/<id>/facturar` | Cierra el pedido y genera la factura asociada. |
@@ -89,7 +90,7 @@ Para facilitar la revisión del proyecto, a continuación se detalla cómo se cu
 1. R1 - BD Relacional: Se implementaron 10 tablas interconectadas (`cliente`, `mesa`, `reserva`, `producto`, `ingrediente`, `pedido`, `detalle_pedido`, `factura`, etc.) con sus respectivas restricciones.
 2. R2 - CRUD Completo: Implementado al 100% en las entidades principales Cliente y Producto mediante los métodos GET, POST, PUT y DELETE.
 3. R3 - Procedimientos Almacenados: Implementación de `cerrar_pedido()`, `registrar_reserva()` y `registrar_pedido()` que encapsulan la lógica transaccional del negocio.
-4. R4 - Triggers: Implementación de `trg_validar_stock` (validación de reglas de negocio BEFORE INSERT ) y `trg_actualizar_total` (cálculo automático de montos AFTER INSERT/UPDATE ).
+4. R4 - Triggers: Implementación de `trg_validar_stock` (validación de reglas de negocio BEFORE INSERT), `trg_actualizar_total` (cálculo automático de montos AFTER INSERT/UPDATE) y `trg_audit_pedido` (auditoría completa de operaciones INSERT/UPDATE/DELETE sobre la tabla pedido).
 5. R5 - Subconsultas: Implementado en la lógica de filtrado avanzado, como la búsqueda de pedidos específicos que superan ciertos montos (`SELECT * FROM pedido WHERE total > ( )`).
 6. R6 - Vistas: Creación de reservas_activas, productos_mas_vendidos y ventas_totales para simplificar reportes analíticos complejos.
 7. R7 - Índices: Creación de índices estratégicos (`idx_cliente_cedula`, `idx_producto_nombre`, `idx_pedido_fecha`, `idx_reserva_fecha`) para optimizar el rendimiento de las consultas más frecuentes en la API.
